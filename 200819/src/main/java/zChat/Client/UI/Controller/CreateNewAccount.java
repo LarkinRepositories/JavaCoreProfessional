@@ -58,7 +58,7 @@ public class CreateNewAccount {
     private void alreadyHave() throws IOException {
         Stage stage = new Stage();
         stage.initStyle(StageStyle.TRANSPARENT);
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../Fxml/Login.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/Client/UI/Fxml/Login.fxml"));
         stage.setScene(new Scene(fxmlLoader.load()));
         stage.getScene().setFill(Color.TRANSPARENT);
         //ChatWindow chatWindow = fxmlLoader.getController();
