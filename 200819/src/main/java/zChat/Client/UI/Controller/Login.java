@@ -119,7 +119,7 @@ public class Login {
     private void createNewAccountWindow() throws IOException {
         Stage stage = new Stage();
         stage.initStyle(StageStyle.TRANSPARENT);
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../Fxml/CreateNewAccount.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/Client/UI/Fxml/CreateNewAccount.fxml"));
         stage.setScene(new Scene(fxmlLoader.load()));
         stage.getScene().setFill(Color.TRANSPARENT);
         ((Stage) passwordField.getScene().getWindow()).close();
@@ -130,7 +130,7 @@ public class Login {
     private void createMainChatWindow() throws IOException {
             Stage stage = new Stage();
             stage.initStyle(StageStyle.TRANSPARENT);
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../Fxml/ChatWindow.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/Client/UI/Fxml/ChatWindow.fxml"));
             stage.setScene(new Scene(fxmlLoader.load()));
             //ChatWindow chatController = fxmlLoader.getController();
             //chatController.setNickname(nickname);
