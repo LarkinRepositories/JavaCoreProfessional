@@ -1,17 +1,24 @@
 package zChat.Server;
 
+import org.sqlite.JDBC;
+
 import java.sql.*;
 import java.util.ArrayList;
 
 
 public class AuthService {
+
+    private static final String DB_PATH = "\\db\\zChat";
+
     private static Connection connection;
     private static Statement statement;
 
 
     public static void connect() throws ClassNotFoundException, SQLException {
-        Class.forName("org.postgresql.Driver");
-        connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/zChat", "postgres", "postgres");
+//        Class.forName("org.postgresql.Driver");
+//        connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/zChat", "postgres", "postgres");
+//        statement = connection.createStatement();
+        connection = DriverManager.getConnection(JDBC.PREFIX + DB_PATH);
         statement = connection.createStatement();
     }
 
