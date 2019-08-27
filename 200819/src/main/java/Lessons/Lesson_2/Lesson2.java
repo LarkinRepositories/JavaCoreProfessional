@@ -56,7 +56,9 @@ public class Lesson2 {
     }
 
     private static void fillTheTableWithProducts(int productCount) throws SQLException {
-        if (productCount < 0 || productCount == 0) return;
+        if (productCount < 0 || productCount == 0) {
+            System.out.println("Количество товаров для заполнения таблицы должно быть >= 0");
+        }
         else {
             connection.setAutoCommit(false);
             PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO products ('prodid', 'title', 'cost') VALUES (?, ?, ?)");
