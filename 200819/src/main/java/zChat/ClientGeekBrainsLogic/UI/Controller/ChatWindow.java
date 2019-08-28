@@ -13,11 +13,11 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class ChatWindow implements Initializable {
@@ -47,7 +47,8 @@ public class ChatWindow implements Initializable {
     private VBox chatBox;
     private boolean isAuthorized;
     private String nickname;
-
+    private List<String> sessionMessages;
+    private File history;
     public void setNickname(String nickname) {
         this.nickname = nickname;
     }
@@ -65,17 +66,6 @@ public class ChatWindow implements Initializable {
             signInBtn.setVisible(false);
         }
     }
-
-    @FXML
-    void emojiAction(ActionEvent event) {
-        if(emojiList.isVisible()){
-
-            emojiList.setVisible(false);
-        }else {
-            emojiList.setVisible(true);
-        }
-    }
-
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setAuthorized(false);
@@ -87,11 +77,13 @@ public class ChatWindow implements Initializable {
         }
     }
 
-    public void connect() {
+    private void connect() {
         try {
             socket = new Socket(IP_ADDRESS, PORT);
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
+            sessionMessages = new ArrayList<>();
+            createHistoryFile();
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -111,6 +103,7 @@ public class ChatWindow implements Initializable {
                         }
                         while (true) {
                             String str = in.readUTF();
+                            if (!str.isEmpty()) sessionMessages.add(str);
                             //messageArea.appendText(str +"\n");
                             //Label label = new Label(str + "\n");
                             if(str.startsWith("/nickChanged")) {
@@ -122,7 +115,12 @@ public class ChatWindow implements Initializable {
                             String[] tokens = str.split(" ");
                             if (tokens[0].substring(0, tokens[0].length()-1).equalsIgnoreCase(nickname)) {
                                 vBox.setAlignment(Pos.TOP_RIGHT);
-                                label = new Label(tokens[1]+ "\n");
+                                StringBuilder message = new StringBuilder();
+                                for (int i = 1; i < tokens.length; i++) {
+                                    message.append(tokens[i]).append(" ");
+                                }
+                                label = new Label(message.toString() + "\n");
+//                                label = new Label(tokens[1]+ "\n");
                             }
                             else {
                                 vBox.setAlignment(Pos.TOP_LEFT);
@@ -131,7 +129,8 @@ public class ChatWindow implements Initializable {
                             vBox.getChildren().add(label);
                             Platform.runLater(() -> chatBox.getChildren().add(vBox));
                             if (str.equals("/serverClosed")) {
-                               setAuthorized(false);
+                                writeHistory();
+                                setAuthorized(false);
                             }
                         }
                     } catch (IOException e) {
@@ -141,6 +140,33 @@ public class ChatWindow implements Initializable {
             }).start();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void createHistoryFile() {
+        this.history = new File("history.txt");
+    }
+
+    private void writeHistory() throws IOException {
+        if (this.history.exists()) {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(this.history));
+            for (String s: sessionMessages) {
+                writer.write(s+"\n");
+            }
+            writer.close();
+        }
+        else {
+            createHistoryFile();
+        }
+    }
+
+    @FXML
+    void emojiAction(ActionEvent event) {
+        if(emojiList.isVisible()){
+
+            emojiList.setVisible(false);
+        }else {
+            emojiList.setVisible(true);
         }
     }
 
