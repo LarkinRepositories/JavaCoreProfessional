@@ -17,8 +17,8 @@ public class Server {
         Socket socket = null;
 
         try {
-            AuthService.connect();
-            String test = AuthService.getNickNameByLoginAndPass("login4", "password4");
+            DbManager.connect();
+            String test = DbManager.getNickNameByLoginAndPass("login4", "password4");
             System.out.println(test);
             server = new ServerSocket(8189);
             System.out.println("Server is running!");
@@ -39,7 +39,7 @@ public class Server {
             } catch (IOException | NullPointerException e) {
                 e.printStackTrace();
             }
-            AuthService.disconnect();
+            DbManager.disconnect();
         }
     }
 
@@ -50,12 +50,12 @@ public class Server {
         return false;
     }
     public boolean isBlacklisted(ClientHandler client, String nickname) throws SQLException {
-        return AuthService.getBlacklistedUsers(client.getUserID()).contains(nickname);
+        return DbManager.getBlacklistedUsers(client.getUserID()).contains(nickname);
     }
 
     public boolean isBlacklisted(String nickname) throws SQLException {
         for (ClientHandler client:clients) {
-            if (AuthService.getBlacklistedUsers(client.getUserID()).contains(nickname)) {
+            if (DbManager.getBlacklistedUsers(client.getUserID()).contains(nickname)) {
                 return true;
             }
         }

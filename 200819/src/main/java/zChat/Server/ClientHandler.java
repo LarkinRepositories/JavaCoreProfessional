@@ -26,15 +26,15 @@ public class ClientHandler {
                         String str = in.readUTF();
                         if (str.startsWith("/new")) {
                             String[] tokens = str.split(" ");
-                            AuthService.createNewAccount(tokens[1], tokens[2], tokens[3]);
+                            DbManager.createNewAccount(tokens[1], tokens[2], tokens[3]);
                             continue;
                         }
 
                         if (str.startsWith("/auth")) {
                             String[] tokens = str.split(" ");
-                            userID = AuthService.getUserIDByLoginAndPass(tokens[1], tokens[2]);
-                            AuthService.passToHashCode(userID, tokens[2]);
-                            nickname = AuthService.getNickNameByLoginAndPass(tokens[1], tokens[2]);
+                            userID = DbManager.getUserIDByLoginAndPass(tokens[1], tokens[2]);
+                            DbManager.passToHashCode(userID, tokens[2]);
+                            nickname = DbManager.getNickNameByLoginAndPass(tokens[1], tokens[2]);
                             if (nickname != null)  {
                                 if (!server.isNicknameBusy(nickname)) {
                                     sendMessage("/authok " +nickname);
@@ -62,7 +62,7 @@ public class ClientHandler {
                         if(message.startsWith("/changeNick ")) {
                             String[] tokens = message.split(" ");
                             String nickname = tokens[1];
-                            AuthService.changeNickname(this.userID, nickname);
+                            DbManager.changeNickname(this.userID, nickname);
                             this.nickname = nickname;
                             sendMessage("/nickChanged "+nickname);
                             continue;
@@ -78,7 +78,7 @@ public class ClientHandler {
                         if (message.startsWith("/ignore ")) {
                             String[] tokens = message.split(" ");
                             String nickname = tokens[1];
-                            AuthService.blacklist(this.userID, nickname);
+                            DbManager.blacklist(this.userID, nickname);
                             //sendMessage(nickname + " blacklisted");
                             continue;
                         }
