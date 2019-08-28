@@ -103,7 +103,7 @@ public class ChatWindow implements Initializable {
                         }
                         while (true) {
                             String str = in.readUTF();
-                            if (!str.isEmpty()) sessionMessages.add(str);
+                            if (!str.isEmpty() && !str.startsWith("/")) sessionMessages.add(str);
                             //messageArea.appendText(str +"\n");
                             //Label label = new Label(str + "\n");
                             if(str.startsWith("/nickChanged")) {
@@ -143,8 +143,11 @@ public class ChatWindow implements Initializable {
         }
     }
 
-    private void createHistoryFile() {
-        this.history = new File("history.txt");
+    private void createHistoryFile() throws IOException {
+            this.history = new File("history.txt");
+            if (!this.history.exists()) {
+            this.history.createNewFile();
+        }
     }
 
     private void writeHistory() throws IOException {
