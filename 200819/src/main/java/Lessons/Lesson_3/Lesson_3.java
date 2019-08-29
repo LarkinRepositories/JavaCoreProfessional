@@ -12,6 +12,7 @@ package Lessons.Lesson_3;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -20,6 +21,7 @@ public class Lesson_3 {
         try {
             readFile("123/3/test.txt");
             sewTogether("123/3/test.txt", "123/3/test2.txt", "123/3/test3.txt");
+            createBigFile(15);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -45,6 +47,34 @@ public class Lesson_3 {
             System.out.print((char) x);
         }
         sequenceInputStream.close();
+    }
+    //создаем большой файл
+    private static void createBigFile(int fileSize) throws IOException {
+      File file = File.createTempFile("bigfile", ".txt");
+      file.deleteOnExit();
+      char[] chars = new char[1024];
+      Arrays.fill(chars, 'B');
+      String str = new String(chars);
+      BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+      for (int i = 0; i < fileSize * 1024; i++) {
+          writer.write(str+"\n");
+      }
+      writer.close();
+      //пункт3
+      readByPage(file.getPath());
+    }
+    //пункт3
+    private static void readByPage(String filePath) throws IOException {
+        final int PAGESIZE = 1800;
+        RandomAccessFile readFromFile = new RandomAccessFile(filePath, "r");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        System.out.println("\n Enter the number of the page below");
+        int pageNumber = Integer.parseInt(reader.readLine());
+        readFromFile.seek(pageNumber*PAGESIZE);
+        for (int i = 0; i < PAGESIZE; i++) {
+            System.out.print((char) readFromFile.read());
+        }
+        reader.close();
     }
 
 }
