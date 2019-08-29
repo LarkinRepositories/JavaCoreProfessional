@@ -174,10 +174,10 @@ public class ChatWindow implements Initializable {
         Label label;
         VBox vBox = new VBox();
         BufferedReader historyReader = new BufferedReader(new FileReader(history));
-        int historyMessageToShowCount = 100;
-        String s;
-        int y = 0;
-        while ((s = historyReader.readLine()) !=null && historyMessageToShowCount >= 0 ) {
+        final int historyMessageToShowCount = 100;
+        String fromHistory;
+        for (int i = 0; i < historyMessageToShowCount && (fromHistory = historyReader.readLine()) != null; i++ ) {
+//        while ((s = historyReader.readLine()) !=null && historyMessageToShowCount >= 0 ) {
 //            if (s.startsWith(this.nickname)) {
 //                vBox.setAlignment(Pos.TOP_RIGHT);
 //                String[] tokens = s.split(" ");
@@ -191,13 +191,12 @@ public class ChatWindow implements Initializable {
 //                vBox.setAlignment(Pos.TOP_LEFT);
 //                label = new Label(s +"\n");
 //            }
-            label = new Label(s+"\n");
-            --historyMessageToShowCount;
+            label = new Label(fromHistory + "\n");
             vBox.getChildren().add(label);
-
+        }
 //            VBox finalVBox = vBox;
 //            Platform.runLater(() -> chatBox.getChildren().add(finalVBox));
-        }
+//        }
         historyReader.close();
         Platform.runLater(() -> chatBox.getChildren().add(vBox));
     }
