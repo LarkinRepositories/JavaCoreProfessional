@@ -48,6 +48,7 @@ public class ChatWindow implements Initializable {
     private boolean isAuthorized;
     private String nickname;
     private List<String> sessionMessages;
+    private File historyPath;
     private File history;
     public void setNickname(String nickname) {
         this.nickname = nickname;
@@ -83,7 +84,6 @@ public class ChatWindow implements Initializable {
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
             sessionMessages = new ArrayList<>();
-            createHistoryFile();
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -93,8 +93,11 @@ public class ChatWindow implements Initializable {
                             if (str.startsWith("/authok")) {
                                 String[] tokens = str.split(" ");
                                 nickname = tokens[1];
+                                System.out.println(nickname);
                                 setAuthorized(true);
                                 messageArea.clear();
+                                createHistoryFile();
+                                showHistory();
                                 break;
                             } else {
                                 setAuthorized(false);
@@ -109,6 +112,7 @@ public class ChatWindow implements Initializable {
                             if(str.startsWith("/nickChanged")) {
                                 String[] tokens = str.split(" ");
                                 nickname = tokens[1];
+                                //createHistoryFile();
                             }
                             Label label;
                             VBox vBox = new VBox();
@@ -144,15 +148,17 @@ public class ChatWindow implements Initializable {
     }
 
     private void createHistoryFile() throws IOException {
-            this.history = new File("history.txt");
-            if (!this.history.exists()) {
-            this.history.createNewFile();
-        }
+            this.historyPath = new File("/history/"+nickname);
+            this.history = new File("/history/"+nickname+"/history.txt");
+            if (!historyPath.exists() && !this.history.exists()) {
+                System.out.println(historyPath.mkdirs());
+                System.out.println(history.createNewFile());
+            }
     }
 
     private void writeHistory() throws IOException {
-        if (this.history.exists()) {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(this.history));
+        if (history.exists()) {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(history));
             for (String s: sessionMessages) {
                 writer.write(s+"\n");
             }
@@ -162,7 +168,33 @@ public class ChatWindow implements Initializable {
             createHistoryFile();
         }
     }
+    private void showHistory() throws IOException {
+        Label label;
+        VBox vBox = new VBox();
+        BufferedReader historyReader = new BufferedReader(new FileReader(history));
+        String s;
+        while ((s = historyReader.readLine()) !=null) {
+            if (s.startsWith(nickname)) {
+                vBox.setAlignment(Pos.TOP_RIGHT);
+//                String[] tokens = s.split(" ");
+//                StringBuilder message = new StringBuilder();
+//                for (int i = 1; i < tokens.length; i++) {
+//                    message.append(tokens[i]).append(" ");
+//                }
+//                label = new Label(message.toString() + "\n");
+            }
+            else  {
+                vBox.setAlignment(Pos.TOP_LEFT);
+//                label = new Label(s +"\n");
+            }
+            label = new Label(s);
+            vBox.getChildren().add(label);
+            Platform.runLater(() -> chatBox.getChildren().add(vBox));
+//            VBox finalVBox = vBox;
+//            Platform.runLater(() -> chatBox.getChildren().add(finalVBox));
+        }
 
+    }
     @FXML
     void emojiAction(ActionEvent event) {
         if(emojiList.isVisible()){
