@@ -187,7 +187,7 @@ public class ChatWindow implements Initializable {
                 vBox.setAlignment(Pos.TOP_LEFT);
 //                label = new Label(s +"\n");
             }
-            label = new Label(s);
+            label = new Label(s+"\n");
             vBox.getChildren().add(label);
             Platform.runLater(() -> chatBox.getChildren().add(vBox));
 //            VBox finalVBox = vBox;
