@@ -21,7 +21,7 @@ public class Lesson_3 {
         try {
             readFile("123/3/test.txt");
             sewTogether("123/3/test.txt", "123/3/test2.txt", "123/3/test3.txt");
-            createBigFile(15);
+            readByPage(createBigFile(15).getPath());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -49,7 +49,7 @@ public class Lesson_3 {
         sequenceInputStream.close();
     }
     //создаем большой файл
-    private static void createBigFile(int fileSize) throws IOException {
+    private static File createBigFile(int fileSize) throws IOException {
       File file = File.createTempFile("bigfile", ".txt");
       file.deleteOnExit();
       char[] chars = new char[1024];
@@ -60,8 +60,7 @@ public class Lesson_3 {
           writer.write(str+"\n");
       }
       writer.close();
-      //пункт3
-      readByPage(file.getPath());
+      return file;
     }
     //пункт3
     private static void readByPage(String filePath) throws IOException {
