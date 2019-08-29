@@ -27,6 +27,12 @@ public class ChatWindow implements Initializable {
 
     private final String IP_ADDRESS = "localhost";
     private final int PORT = 8189;
+
+    private boolean isAuthorized;
+    private String nickname;
+    private List<String> sessionMessages;
+    private File history;
+
     @FXML
     private TextArea inputMessageArea;
     @FXML
@@ -45,11 +51,7 @@ public class ChatWindow implements Initializable {
     private Button signInBtn;
     @FXML
     private VBox chatBox;
-    private boolean isAuthorized;
-    private String nickname;
-    private List<String> sessionMessages;
-    private File historyPath;
-    private File history;
+
     public void setNickname(String nickname) {
         this.nickname = nickname;
     }
@@ -148,7 +150,7 @@ public class ChatWindow implements Initializable {
     }
 
     private void createHistoryFile() throws IOException {
-            this.historyPath = new File("/history/"+nickname);
+        File historyPath = new File("/history/" + nickname);
             this.history = new File("/history/"+nickname+"/history.txt");
             if (!historyPath.exists() && !this.history.exists()) {
                 System.out.println(historyPath.mkdirs());
@@ -172,22 +174,25 @@ public class ChatWindow implements Initializable {
         Label label;
         VBox vBox = new VBox();
         BufferedReader historyReader = new BufferedReader(new FileReader(history));
+        int historyMessageToShowCount = 100;
         String s;
-        while ((s = historyReader.readLine()) !=null) {
-            if (s.startsWith(nickname)) {
-                vBox.setAlignment(Pos.TOP_RIGHT);
+        int y = 0;
+        while ((s = historyReader.readLine()) !=null && historyMessageToShowCount >= 0 ) {
+//            if (s.startsWith(this.nickname)) {
+//                vBox.setAlignment(Pos.TOP_RIGHT);
 //                String[] tokens = s.split(" ");
 //                StringBuilder message = new StringBuilder();
 //                for (int i = 1; i < tokens.length; i++) {
 //                    message.append(tokens[i]).append(" ");
 //                }
 //                label = new Label(message.toString() + "\n");
-            }
-            else  {
-                vBox.setAlignment(Pos.TOP_LEFT);
+//            }
+//            else  {
+//                vBox.setAlignment(Pos.TOP_LEFT);
 //                label = new Label(s +"\n");
-            }
+//            }
             label = new Label(s+"\n");
+            --historyMessageToShowCount;
             vBox.getChildren().add(label);
             Platform.runLater(() -> chatBox.getChildren().add(vBox));
 //            VBox finalVBox = vBox;
