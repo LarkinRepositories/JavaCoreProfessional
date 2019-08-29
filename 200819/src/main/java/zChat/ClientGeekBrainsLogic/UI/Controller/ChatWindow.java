@@ -12,6 +12,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
+import org.apache.commons.io.input.ReversedLinesFileReader;
 
 import java.io.*;
 import java.net.Socket;
@@ -173,10 +174,10 @@ public class ChatWindow implements Initializable {
     private void showHistory() throws IOException {
         Label label;
         VBox vBox = new VBox();
-        BufferedReader historyReader = new BufferedReader(new FileReader(history));
+        //BufferedReader historyReader = new BufferedReader(new FileReader(history));
+        ReversedLinesFileReader historyReader = new ReversedLinesFileReader(history);
         final int historyMessageToShowCount = 100;
-        String fromHistory;
-        for (int i = 0; i < historyMessageToShowCount && (fromHistory = historyReader.readLine()) != null; i++ ) {
+        for (int i = 0; i < historyMessageToShowCount && !historyReader.readLine().isEmpty(); i++ ) {
 //        while ((s = historyReader.readLine()) !=null && historyMessageToShowCount >= 0 ) {
 //            if (s.startsWith(this.nickname)) {
 //                vBox.setAlignment(Pos.TOP_RIGHT);
@@ -191,7 +192,7 @@ public class ChatWindow implements Initializable {
 //                vBox.setAlignment(Pos.TOP_LEFT);
 //                label = new Label(s +"\n");
 //            }
-            label = new Label(fromHistory + "\n");
+            label = new Label(historyReader.readLine() + "\n");
             vBox.getChildren().add(label);
         }
 //            VBox finalVBox = vBox;
