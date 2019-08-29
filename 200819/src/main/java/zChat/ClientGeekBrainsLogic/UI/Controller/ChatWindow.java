@@ -194,11 +194,12 @@ public class ChatWindow implements Initializable {
             label = new Label(s+"\n");
             --historyMessageToShowCount;
             vBox.getChildren().add(label);
-            Platform.runLater(() -> chatBox.getChildren().add(vBox));
+
 //            VBox finalVBox = vBox;
 //            Platform.runLater(() -> chatBox.getChildren().add(finalVBox));
         }
-
+        historyReader.close();
+        Platform.runLater(() -> chatBox.getChildren().add(vBox));
     }
     @FXML
     void emojiAction(ActionEvent event) {
