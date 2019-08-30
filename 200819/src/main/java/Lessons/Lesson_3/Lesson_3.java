@@ -38,13 +38,15 @@ public class Lesson_3 {
     //пункт2
     private static void sewTogether(String...filePaths) throws IOException {
         List<InputStream> files = new ArrayList<>();
+        FileOutputStream all = new FileOutputStream("123/3/test3.txt");
         for (int i = 0; i < filePaths.length; i++) {
             files.add(new FileInputStream(filePaths[i]));
         }
         SequenceInputStream sequenceInputStream = new SequenceInputStream(Collections.enumeration(files));
         int x;
-        while ((x = sequenceInputStream.read()) != -1) {
-            System.out.print((char) x);
+        while (sequenceInputStream.available() > 0) {
+            x = sequenceInputStream.read();
+            all.write(x);
         }
         sequenceInputStream.close();
     }
