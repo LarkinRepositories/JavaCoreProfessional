@@ -12,11 +12,14 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
+import zChat.ClientGeekBrainsLogic.HistoryManagement.HistoryManager;
+import zChat.ClientGeekBrainsLogic.HistoryManagement.HistoryManagerImpl;
 
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -32,6 +35,7 @@ public class ChatWindow implements Initializable {
     private String nickname;
     private List<String> sessionMessages;
     private File history;
+    private HistoryManagerImpl historyManager = null;
 
     @FXML
     private TextArea inputMessageArea;
@@ -55,6 +59,8 @@ public class ChatWindow implements Initializable {
     public void setNickname(String nickname) {
         this.nickname = nickname;
     }
+    public String getNickname() { return nickname; }
+    public VBox getChatBox() { return chatBox; }
 
     public void setAuthorized(boolean isAuthorized) {
         this.isAuthorized = isAuthorized;
@@ -85,7 +91,8 @@ public class ChatWindow implements Initializable {
             socket = new Socket(IP_ADDRESS, PORT);
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
-            sessionMessages = new ArrayList<>();
+            //sessionMessages = new ArrayList<>();
+            historyManager = new HistoryManagerImpl();
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -95,11 +102,11 @@ public class ChatWindow implements Initializable {
                             if (str.startsWith("/authok")) {
                                 String[] tokens = str.split(" ");
                                 nickname = tokens[1];
+                                historyManager.setNickname(nickname);
                                 System.out.println(nickname);
                                 setAuthorized(true);
                                 messageArea.clear();
-                                createHistoryFile();
-                                showHistory();
+                                showHistory(historyManager.loadHistory());
                                 break;
                             } else {
                                 setAuthorized(false);
@@ -108,7 +115,7 @@ public class ChatWindow implements Initializable {
                         }
                         while (true) {
                             String str = in.readUTF();
-                            if (!str.isEmpty() && !str.startsWith("/")) sessionMessages.add(str);
+                            if (!str.isEmpty() && !str.startsWith("/")) historyManager.storeMessage(str);
                             //messageArea.appendText(str +"\n");
                             //Label label = new Label(str + "\n");
                             if(str.startsWith("/nickChanged")) {
@@ -135,7 +142,7 @@ public class ChatWindow implements Initializable {
                             vBox.getChildren().add(label);
                             Platform.runLater(() -> chatBox.getChildren().add(vBox));
                             if (str.equals("/serverClosed")) {
-                                writeHistory();
+                                //writeHistory();
                                 setAuthorized(false);
                             }
                         }
@@ -149,57 +156,17 @@ public class ChatWindow implements Initializable {
         }
     }
 
-    private void createHistoryFile() throws IOException {
-        File historyPath = new File("/history/" + nickname);
-            this.history = new File("/history/"+nickname+"/history.txt");
-            if (!historyPath.exists() && !this.history.exists()) {
-                System.out.println(historyPath.mkdirs());
-                System.out.println(history.createNewFile());
-            }
-    }
-
-    private void writeHistory() throws IOException {
-        if (history.exists()) {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(history));
-            for (String s: sessionMessages) {
-                writer.write(s+"\n");
-            }
-            writer.close();
-        }
-        else {
-            createHistoryFile();
-        }
-    }
-    private void showHistory() throws IOException {
+    @FXML
+    private void showHistory(Collection<String> historyMessagesCollection) {
         Label label;
         VBox vBox = new VBox();
-        BufferedReader historyReader = new BufferedReader(new FileReader(history));
-        final int historyMessageToShowCount = 100;
-        String messageFromHistory;
-        for (int i = 0; i < historyMessageToShowCount && (messageFromHistory = historyReader.readLine()) != null; i++ ) {
-//        while ((s = historyReader.readLine()) !=null && historyMessageToShowCount >= 0 ) {
-//            if (s.startsWith(this.nickname)) {
-//                vBox.setAlignment(Pos.TOP_RIGHT);
-//                String[] tokens = s.split(" ");
-//                StringBuilder message = new StringBuilder();
-//                for (int i = 1; i < tokens.length; i++) {
-//                    message.append(tokens[i]).append(" ");
-//                }
-//                label = new Label(message.toString() + "\n");
-//            }
-//            else  {
-//                vBox.setAlignment(Pos.TOP_LEFT);
-//                label = new Label(s +"\n");
-//            }
-            label = new Label(messageFromHistory + "\n");
+        for (String message:historyMessagesCollection) {
+            label = new Label(message+"\n");
             vBox.getChildren().add(label);
         }
-//            VBox finalVBox = vBox;
-//            Platform.runLater(() -> chatBox.getChildren().add(finalVBox));
-//        }
-        historyReader.close();
         Platform.runLater(() -> chatBox.getChildren().add(vBox));
     }
+
     @FXML
     void emojiAction(ActionEvent event) {
         if(emojiList.isVisible()){
