@@ -3,6 +3,7 @@ package zChat.Server;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.Socket;
 import java.sql.SQLException;
 
