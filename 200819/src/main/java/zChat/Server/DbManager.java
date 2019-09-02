@@ -6,7 +6,7 @@ import java.sql.*;
 import java.util.ArrayList;
 
 
-public class AuthService {
+public class DbManager {
 
     private static final String DB_PATH = "\\db\\zChat";
 
