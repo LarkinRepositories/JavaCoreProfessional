@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.Socket;
 import java.sql.SQLException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ClientHandler {
     private Server server;
@@ -15,98 +17,87 @@ public class ClientHandler {
     private String nickname;
     private int userID;
 
-    public ClientHandler(Server server, Socket socket) {
-        try {
+    public ClientHandler(Server server, Socket socket) throws IOException {
             this.socket = socket;
             this.server = server;
             this.in = new DataInputStream(socket.getInputStream());
             this.out = new DataOutputStream(socket.getOutputStream());
-            new Thread(() -> {
+            server.getExecutorService().execute(() -> {
                 try {
-                    while (true) {
-                        String str = in.readUTF();
-                        if (str.startsWith("/new")) {
-                            String[] tokens = str.split(" ");
-                            DbManager.createNewAccount(tokens[1], tokens[2], tokens[3]);
-                            continue;
-                        }
-
-                        if (str.startsWith("/auth")) {
-                            String[] tokens = str.split(" ");
-                            userID = DbManager.getUserIDByLoginAndPass(tokens[1], tokens[2]);
-                            DbManager.passToHashCode(userID, tokens[2]);
-                            nickname = DbManager.getNickNameByLoginAndPass(tokens[1], tokens[2]);
-                            if (nickname != null)  {
-                                if (!server.isNicknameBusy(nickname)) {
-                                    sendMessage("/authok " +nickname);
-                                    server.subscribe(ClientHandler.this);
-                                    System.out.println(nickname + " connected");
-                                    server.broadcastMessage(nickname + " joined the conversation");
-                                    break;
-                                }  else {
-                                    sendMessage(String.format("%s is already authorized", nickname));
-                                }
-                            } else {
-                                sendMessage("Incorrect login/password!");
-                            }
-                        }
-                    }
-
-                    while (true) {
-                        String message = in.readUTF();
-                        System.out.println(nickname+": " + message);
-                        if (message.equals("/end")) {
-                            out.writeUTF("/serverClosed");
-                            break;
-                        }
-
-                        if(message.startsWith("/changeNick ")) {
-                            String[] tokens = message.split(" ");
-                            String nickname = tokens[1];
-                            DbManager.changeNickname(this.userID, nickname);
-                            this.nickname = nickname;
-                            sendMessage("/nickChanged "+nickname);
-                            continue;
-                        }
-
-                        if (message.startsWith("/w ")){
-                            String[] tokens = message.split(" ");
-                            String nickname = tokens[1];
-                            String msg = message.substring(4 + nickname.length());
-                            server.whisper(this, nickname, msg);
-                            continue;
-                        }
-                        if (message.startsWith("/ignore ")) {
-                            String[] tokens = message.split(" ");
-                            String nickname = tokens[1];
-                            DbManager.blacklist(this.userID, nickname);
-                            //sendMessage(nickname + " blacklisted");
-                            continue;
-                        }
-                           server.broadcastMessage(nickname + ": " + message);
-                    }
+                    recieveMessages();
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (SQLException e) {
                     e.printStackTrace();
-                } finally {
-                    try {
-                        in.close();
-                        out.close();
-                        socket.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    if (nickname != null) {
-                        server.unsubscribe(ClientHandler.this);
-                        System.out.println(nickname + " disconnected");
-                    }
                 }
-            }).start();
-            } catch (IOException ex) {
-            ex.printStackTrace();
+            });
+    }
+
+    private void recieveMessages() throws IOException, SQLException {
+        while (true) {
+            String str = in.readUTF();
+            if (str.startsWith("/new")) {
+                String[] tokens = str.split(" ");
+                DbManager.createNewAccount(tokens[1], tokens[2], tokens[3]);
+                continue;
+            }
+
+            if (str.startsWith("/auth")) {
+                String[] tokens = str.split(" ");
+                userID = DbManager.getUserIDByLoginAndPass(tokens[1], tokens[2]);
+                DbManager.passToHashCode(userID, tokens[2]);
+                nickname = DbManager.getNickNameByLoginAndPass(tokens[1], tokens[2]);
+                if (nickname != null)  {
+                    if (!server.isNicknameBusy(nickname)) {
+                        sendMessage("/authok " +nickname);
+                        server.subscribe(ClientHandler.this);
+                        System.out.println(nickname + " connected");
+                        server.broadcastMessage(nickname + " joined the conversation");
+                        break;
+                    }  else {
+                        sendMessage(String.format("%s is already authorized", nickname));
+                    }
+                } else {
+                    sendMessage("Incorrect login/password!");
+                }
+            }
+        }
+
+        while (true) {
+            String message = in.readUTF();
+            System.out.println(nickname+": " + message);
+            if (message.equals("/end")) {
+                out.writeUTF("/serverClosed");
+                break;
+            }
+
+            if(message.startsWith("/changeNick ")) {
+                String[] tokens = message.split(" ");
+                String nickname = tokens[1];
+                DbManager.changeNickname(this.userID, nickname);
+                this.nickname = nickname;
+                sendMessage("/nickChanged "+nickname);
+                continue;
+            }
+
+            if (message.startsWith("/w ")){
+                String[] tokens = message.split(" ");
+                String nickname = tokens[1];
+                String msg = message.substring(4 + nickname.length());
+                server.whisper(this, nickname, msg);
+                continue;
+            }
+            if (message.startsWith("/ignore ")) {
+                String[] tokens = message.split(" ");
+                String nickname = tokens[1];
+                DbManager.blacklist(this.userID, nickname);
+                //sendMessage(nickname + " blacklisted");
+                continue;
+            }
+            server.broadcastMessage(nickname + ": " + message);
         }
     }
+
     public synchronized void sendMessage(String message) {
         try {
             out.writeUTF(message);

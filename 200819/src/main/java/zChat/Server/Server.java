@@ -6,16 +6,19 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.SQLException;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Server {
 
     private Vector<ClientHandler> clients;
+    private ExecutorService executorService;
 
     public Server() throws SQLException, ClassNotFoundException {
         clients = new Vector<>();
         ServerSocket server = null;
         Socket socket = null;
-
+        this.executorService = Executors.newCachedThreadPool();
         try {
             DbManager.connect();
             String test = DbManager.getNickNameByLoginAndPass("login1", "password4");
@@ -40,6 +43,7 @@ public class Server {
                 e.printStackTrace();
             }
             DbManager.disconnect();
+            executorService.shutdown();
         }
     }
 
@@ -90,5 +94,9 @@ public class Server {
 
     public void unsubscribe(ClientHandler client) {
         clients.remove(client);
+    }
+
+    public ExecutorService getExecutorService() {
+        return executorService;
     }
 }
