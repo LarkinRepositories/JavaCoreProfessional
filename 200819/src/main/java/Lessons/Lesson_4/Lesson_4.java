@@ -1,6 +1,7 @@
 package Lessons.Lesson_4;
 /*
 1. Создать три потока, каждый из которых выводит определенную букву (A, B и C) 5 раз (порядок – ABСABСABС). Используйте wait/notify/notifyAll.
+//DONE
  */
 public class Lesson_4 {
     private static final Object monitor = new Object();
