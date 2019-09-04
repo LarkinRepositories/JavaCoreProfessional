@@ -12,15 +12,12 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
-import zChat.ClientGeekBrainsLogic.HistoryManagement.HistoryManager;
 import zChat.ClientGeekBrainsLogic.HistoryManagement.HistoryManagerImpl;
 
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.ResourceBundle;
 
 public class ChatWindow implements Initializable {
@@ -33,8 +30,6 @@ public class ChatWindow implements Initializable {
 
     private boolean isAuthorized;
     private String nickname;
-    private List<String> sessionMessages;
-    private File history;
     private HistoryManagerImpl historyManager = null;
 
     @FXML
@@ -91,7 +86,6 @@ public class ChatWindow implements Initializable {
             socket = new Socket(IP_ADDRESS, PORT);
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
-            //sessionMessages = new ArrayList<>();
             historyManager = new HistoryManagerImpl();
             new Thread(new Runnable() {
                 @Override
@@ -116,12 +110,9 @@ public class ChatWindow implements Initializable {
                         while (true) {
                             String str = in.readUTF();
                             if (!str.isEmpty() && !str.startsWith("/")) historyManager.storeMessage(str);
-                            //messageArea.appendText(str +"\n");
-                            //Label label = new Label(str + "\n");
                             if(str.startsWith("/nickChanged")) {
                                 String[] tokens = str.split(" ");
                                 nickname = tokens[1];
-                                //createHistoryFile();
                             }
                             Label label;
                             VBox vBox = new VBox();
@@ -133,7 +124,6 @@ public class ChatWindow implements Initializable {
                                     message.append(tokens[i]).append(" ");
                                 }
                                 label = new Label(message.toString() + "\n");
-//                                label = new Label(tokens[1]+ "\n");
                             }
                             else {
                                 vBox.setAlignment(Pos.TOP_LEFT);
@@ -142,7 +132,6 @@ public class ChatWindow implements Initializable {
                             vBox.getChildren().add(label);
                             Platform.runLater(() -> chatBox.getChildren().add(vBox));
                             if (str.equals("/serverClosed")) {
-                                //writeHistory();
                                 setAuthorized(false);
                             }
                         }
@@ -195,7 +184,6 @@ public class ChatWindow implements Initializable {
 
     @FXML
     void sendMsg(ActionEvent e) {
-        //messageArea.appendText(inputMessageArea.getText()+"\n");
         try {
             out.writeUTF(inputMessageArea.getText());
             inputMessageArea.clear();
