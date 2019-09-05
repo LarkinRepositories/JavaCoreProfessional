@@ -8,6 +8,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Race {
     private CopyOnWriteArrayList<Stage> stages;
+    public static final Object MONITOR = new Object();
+
+
     public CopyOnWriteArrayList<Stage> getStages() {
         return stages;
     }
