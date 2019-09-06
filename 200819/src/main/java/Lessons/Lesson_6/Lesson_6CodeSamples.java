@@ -8,10 +8,10 @@ public class Lesson_6CodeSamples {
 
     public static void main(String[] args) {
         LOGGER.debug("Debug");
-        LOGGER.info("Info");
-        LOGGER.warn("Warn");
-        LOGGER.error("Error");
-        LOGGER.fatal("Fatal");
+        LOGGER.info("Info"); //просто инфа
+        LOGGER.warn("Warn"); //что-то пошло не так
+        LOGGER.error("Error"); // жесткий мониторинг
+        LOGGER.fatal("Fatal"); //совсем жетский мониторинг
         LOGGER.info("String: {}.", "Hello World");
         //никогда не выведется, т.к в log4j2.xml установлено значение info для Root level
         LOGGER.trace(Lesson_6CodeSamples::new);
