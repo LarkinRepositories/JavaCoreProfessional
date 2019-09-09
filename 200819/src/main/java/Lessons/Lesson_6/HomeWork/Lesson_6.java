@@ -19,9 +19,10 @@ import java.util.Arrays;
 public class Lesson_6 {
 
     public Integer[] task1(Integer[] array) {
+        if (array.length == 0) System.out.println("Передаваемый массив не должен быть пустым");
         final int NUMBER = 4;
-        if (array.length == 0 || !Arrays.asList(array).contains(NUMBER))
-            throw new RuntimeException("Передан пустой массив или массив не содержит цифру " + NUMBER);
+        if (!Arrays.asList(array).contains(NUMBER)) throw new RuntimeException(
+                "Переданный массив не содержит цифру " + NUMBER);
         return Arrays.copyOfRange(array, Arrays.asList(array).lastIndexOf(4)+1, array.length);
     }
 
@@ -32,7 +33,7 @@ public class Lesson_6 {
     }
 
     public static void main(String[] args) {
-        Integer[] array = new Integer[] {1,1,1,1,1,4,1,7};
+        Integer[] array = new Integer[] {1,1,1,1,4,4,4,7};
         Lesson_6 lesson = new Lesson_6();
         System.out.println(Arrays.toString(lesson.task1(array)));
     }
