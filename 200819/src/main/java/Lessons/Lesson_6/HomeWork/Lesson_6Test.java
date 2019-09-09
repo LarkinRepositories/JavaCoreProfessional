@@ -16,7 +16,7 @@ public class Lesson_6Test {
     private Lesson_6 homework;
     private Integer[] test;
     private Integer[] expected;
-
+    private boolean task2Expected;
 
     public Lesson_6Test(Integer[] test, Integer[] expected) {
         this.test = test;
@@ -51,6 +51,16 @@ public class Lesson_6Test {
 
     @Test
     public void task2() {
-
+        Assert.assertTrue("true", homework.task2(test));
     }
+    @Test
+    public void task2False() {
+        Assert.assertFalse("false", homework.task2(new Integer[]{1,1,1,1,1,1}));
+    }
+
+    @Test
+    public void task2False1() {
+        Assert.assertFalse("false", homework.task2(new Integer[]{4,4,4,4,4,4}));
+    }
+
 }
