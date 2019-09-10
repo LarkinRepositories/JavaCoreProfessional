@@ -1,7 +1,13 @@
 package zChat.Server;
+/*
+ Добавить на серверную сторону чата логирование, с выводом информации о действиях на сервере
+ (запущен DONE, произошла ошибка DONE, клиент подключился DONE, клиент прислал сообщение/команду DONE).
+ */
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.SQLException;
@@ -9,10 +15,12 @@ import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+
 public class Server {
 
     private Vector<ClientHandler> clients;
     private ExecutorService executorService;
+    public static final Logger LOG = LogManager.getLogger(Server.class.getName());
 
     public Server() throws SQLException, ClassNotFoundException {
         clients = new Vector<>();
@@ -24,23 +32,28 @@ public class Server {
             String test = DbManager.getNickNameByLoginAndPass("login1", "password4");
             System.out.println(test);
             server = new ServerSocket(8189);
-            System.out.println("Server is running!");
+            LOG.info("Server started");
+            //System.out.println("Server is running!");
             while (true) {
                 socket = server.accept();
                 new ClientHandler(this, socket);
             }
         } catch (IOException e) {
             e.printStackTrace();
+            LOG.error(e.getClass().getName() + e.getMessage());
         } finally {
             try {
                 socket.close();
             } catch (IOException | NullPointerException e) {
                 e.printStackTrace();
+                LOG.error(e.getClass().getName() + e.getMessage());
             }
             try {
                 server.close();
+                LOG.info("Server shutdown");
             } catch (IOException | NullPointerException e) {
                 e.printStackTrace();
+                LOG.error(e.getClass().getName() + e.getMessage());
             }
             DbManager.disconnect();
             executorService.shutdown();
@@ -53,6 +66,7 @@ public class Server {
         }
         return false;
     }
+
     public boolean isBlacklisted(ClientHandler client, String nickname) throws SQLException {
         return DbManager.getBlacklistedUsers(client.getUserID()).contains(nickname);
     }
@@ -90,10 +104,12 @@ public class Server {
 
     public void subscribe(ClientHandler client) {
        clients.add(client);
+       LOG.info(String.format("Client connected: %s", client.getNickname()));
     }
 
     public void unsubscribe(ClientHandler client) {
         clients.remove(client);
+        LOG.info(String.format("Client disconnected: %s", client.getNickname()));
     }
 
     public ExecutorService getExecutorService() {

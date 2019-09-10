@@ -3,11 +3,8 @@ package zChat.Server;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.Socket;
 import java.sql.SQLException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class ClientHandler {
     private Server server;
@@ -25,10 +22,9 @@ public class ClientHandler {
             server.getExecutorService().execute(() -> {
                 try {
                     recieveMessages();
-                } catch (IOException e) {
+                } catch (IOException | SQLException e) {
                     e.printStackTrace();
-                } catch (SQLException e) {
-                    e.printStackTrace();
+                    Server.LOG.error(e.getClass().getName() + e.getMessage());
                 }
             });
     }
@@ -39,6 +35,7 @@ public class ClientHandler {
             if (str.startsWith("/new")) {
                 String[] tokens = str.split(" ");
                 DbManager.createNewAccount(tokens[1], tokens[2], tokens[3]);
+                Server.LOG.info(String.format("New account created: %s", tokens[1]));
                 continue;
             }
 
@@ -51,11 +48,11 @@ public class ClientHandler {
                     if (!server.isNicknameBusy(nickname)) {
                         sendMessage("/authok " +nickname);
                         server.subscribe(ClientHandler.this);
-                        System.out.println(nickname + " connected");
                         server.broadcastMessage(nickname + " joined the conversation");
                         break;
                     }  else {
                         sendMessage(String.format("%s is already authorized", nickname));
+                        Server.LOG.info(String.format("%s tries to authorize from different devices at the same time", nickname));
                     }
                 } else {
                     sendMessage("Incorrect login/password!");
@@ -91,10 +88,12 @@ public class ClientHandler {
                 String[] tokens = message.split(" ");
                 String nickname = tokens[1];
                 DbManager.blacklist(this.userID, nickname);
+                Server.LOG.info(String.format("%s blacklisted %s", this.nickname, nickname));
                 //sendMessage(nickname + " blacklisted");
                 continue;
             }
             server.broadcastMessage(nickname + ": " + message);
+            Server.LOG.info(String.format("%s : %s", nickname, message));
         }
     }
 
@@ -104,6 +103,7 @@ public class ClientHandler {
             out.flush();
         } catch (IOException e) {
             e.printStackTrace();
+            Server.LOG.error(e.getClass().getName() + e.getMessage());
         }
     }
     public String getNickname() {
