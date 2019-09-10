@@ -23,7 +23,7 @@ public class Lesson_6 {
         final int NUMBER = 4;
         if (!Arrays.asList(array).contains(NUMBER)) throw new RuntimeException(
                 "Переданный массив не содержит цифру " + NUMBER);
-        return Arrays.copyOfRange(array, Arrays.asList(array).lastIndexOf(4)+1, array.length);
+        return Arrays.copyOfRange(array, Arrays.asList(array).lastIndexOf(NUMBER)+1, array.length);
     }
 
     public boolean task2(Integer[] array) {
