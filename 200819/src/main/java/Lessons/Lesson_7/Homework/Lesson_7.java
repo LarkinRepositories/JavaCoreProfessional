@@ -5,7 +5,6 @@ import Lessons.Lesson_7.Homework.Annotations.BeforeSuite;
 import Lessons.Lesson_7.Homework.Annotations.Test;
 import Lessons.Lesson_7.Homework.TestClasses.MyClass;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -45,32 +44,32 @@ public class Lesson_7 {
     };
 
     private static <T> void startTests(Class<T> klass) throws IllegalAccessException, InstantiationException, InvocationTargetException {
-        if (Collections.frequency(new ArrayList<Annotation>(Arrays.asList(klass.getAnnotations())), BeforeSuite.class) > 1)
-            throw new RuntimeException("@BeforeSuite > 1");
-        else {
-            final T klassInstance;
-            final Method[] beforeAfter = {null, null};
-            Set<Method> testMethods = new TreeSet<>(methodPriorityComparator);
-            klassInstance = klass.newInstance();
-            new ArrayList<Method>(Arrays.asList(klass.getDeclaredMethods())).forEach(method -> {
-                method.setAccessible(true);
-                if (method.isAnnotationPresent(BeforeSuite.class))
-                    beforeAfter[0] = method;
-                else if (method.isAnnotationPresent(AfterSuite.class))
-                    beforeAfter[1] = method;
+        final T klassInstance;
+        final Method[] beforeAfter = {null, null};
+        Set<Method> testMethods = new TreeSet<>(methodPriorityComparator);
+        klassInstance = klass.newInstance();
+        new ArrayList<Method>(Arrays.asList(klass.getDeclaredMethods())).forEach(method -> {
+            method.setAccessible(true);
+                if (method.isAnnotationPresent(BeforeSuite.class)) {
+                    if (beforeAfter[0] == null ) beforeAfter[0] = method;
+                    else throw new RuntimeException("@BeforeSuite > 1");
+                }
+                else if (method.isAnnotationPresent(AfterSuite.class)) {
+                    if (beforeAfter[1] == null) beforeAfter[1] = method;
+                    else throw new RuntimeException("@AfterSuite > 1");
+                }
                 else if (method.isAnnotationPresent(Test.class))
                     testMethods.add(method);
             });
-            if (beforeAfter[0] !=null) beforeAfter[0].invoke(klassInstance);
-            testMethods.forEach(method -> {
-                try {
-                    method.invoke(klassInstance);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    e.printStackTrace();
-                }
+        if (beforeAfter[0] !=null) beforeAfter[0].invoke(klassInstance);
+        testMethods.forEach(method -> {
+            try {
+                method.invoke(klassInstance);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
             });
             if (beforeAfter[1] != null)
                 beforeAfter[1].invoke(klassInstance);
-        }
     }
 }
