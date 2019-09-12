@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class ReflectionApp {
+public class ReflectionApp implements Cloneable {
     @MarkingAnnotation
     public void markedMethod() {
         System.out.println("Java");
