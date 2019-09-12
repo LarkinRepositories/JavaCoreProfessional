@@ -10,6 +10,10 @@ public class MyClass {
         System.out.println("this is from the method with @BeforeSuite");
     }
 
+    @BeforeSuite
+    public void exceptionThrower() {
+        System.out.println("This would never been seen");
+    }
     @Test(priority = 1)
     public void firstTestMethod() {
         System.out.println("this is from first test method");
