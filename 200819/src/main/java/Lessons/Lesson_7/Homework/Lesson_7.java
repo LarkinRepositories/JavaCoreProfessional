@@ -20,9 +20,8 @@ import java.util.*;
  */
 public class Lesson_7 {
     public static void main(String[] args) {
-        MyClass myClass = new MyClass();
         try {
-            start(myClass);
+            start(MyClass.class);
         } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
             e.printStackTrace();
         }
@@ -31,8 +30,8 @@ public class Lesson_7 {
     public static void start(String klassName) throws ClassNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
         start(Class.forName(klassName));
     }
-    public static void start(Object klass) throws IllegalAccessException, InvocationTargetException, InstantiationException {
-        startTests(klass.getClass());
+    public static void start(Class<?> klass) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+        startTests(klass);
     }
 
     private static Comparator<Method> methodPriorityComparator = (firstMethod, secondMethod) -> {
